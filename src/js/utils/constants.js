@@ -8,13 +8,7 @@ export const COMPATIBLE_CHARTS = {
 	heatmap: []
 };
 
-export const DATA_COLOR_DIVISIONS = {
-	bar: 'datasets',
-	line: 'datasets',
-	pie: 'labels',
-	percentage: 'labels',
-	heatmap: HEATMAP_DISTRIBUTION_SIZE
-};
+
 
 export const BASE_MEASURES = {
 	margins: {
@@ -103,3 +97,11 @@ export const DEFAULT_COLORS = {
 // Universal constants
 export const ANGLE_RATIO = Math.PI / 180;
 export const FULL_ANGLE = 360;
+
+export const DATA_COLOR_DIVISIONS = {
+	bar: 'datasets',
+	line: 'datasets',
+	pie: 'labels',
+	percentage: 'labels',
+	heatmap: HEATMAP_DISTRIBUTION_SIZE
+};
