@@ -113,9 +113,9 @@ export default class AxisChart extends BaseChart {
 
 		s.datasets = this.data.datasets.map((d, i) => {
 			let values = d.values;
-			let cumulativeYs = d.cumulativeYs || [];
-			let cumulativeYPositives = d.cumulativeYPositive || [];
-			let cumulativeYNegatives = d.cumulativeYNegative || [];
+			const cumulativeYs = d.cumulativeYs || [];
+			const cumulativeYPositives = d.cumulativeYPositive || [];
+			const cumulativeYNegatives = d.cumulativeYNegative || [];
 
 			return {
 				name: d.name && d.name.replace(/<|>|&/g, (char) => char == '&' ? '&amp;' : char == '<' ? '&lt;' : '&gt;'),
@@ -178,7 +178,6 @@ export default class AxisChart extends BaseChart {
 			// separately below the axis in it's own plane
 			let cumulativePositive = new Array(this.state.datasetLength).fill(0);
 			let cumulativeNegative = new Array(this.state.datasetLength).fill(0);
-			let lineCumulative = new Array(this.state.datasetLength).fill(0);
 			
 			this.data.datasets.forEach((d, i) => {
 				let values = this.data.datasets[i].values;
@@ -307,9 +306,8 @@ export default class AxisChart extends BaseChart {
 						offsets = d.yPositions.map((yPos, index) => {
 							if (d.values[index] > 0) {
 								return yPos - d.cumulativeYPositivePositions[index]
-							} else {
-								return yPos - d.cumulativeYNegativesPositions[index]
 							}
+							return yPos - d.cumulativeYNegativesPositions[index]
 						});
 					}
 
