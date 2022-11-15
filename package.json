@@ -1,40 +1,28 @@
 {
-  "name": "frappe-charts",
-  "version": "2.0.0-rc23",
+  "name": "@deepsource/charts",
+  "version": "1.0.0",
   "main": "dist/frappe-charts.esm.js",
   "module": "dist/frappe-charts.esm.js",
   "browser": "dist/frappe-charts.umd.js",
   "common": "dist/frappe-charts.cjs.js",
   "unnpkg": "dist/frappe-charts.umd.js",
   "type": "module",
-  "description": "https://frappe.github.io/charts",
-  "directories": {
-    "doc": "docs"
-  },
   "files": [
     "src",
     "dist"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "rollup -c --watch",
     "dev": "npm-run-all --parallel watch",
     "build": "rollup -c"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/frappe/charts.git"
-  },
+  "repository": "https://github.com/deepsourcelabs/charts",
   "keywords": [
     "js",
     "charts"
   ],
   "author": "Prateeksha Singh",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/frappe/charts/issues"
-  },
-  "homepage": "https://github.com/frappe/charts#readme",
   "devDependencies": {
     "@babel/core": "^7.10.5",
     "@babel/preset-env": "^7.10.4",
