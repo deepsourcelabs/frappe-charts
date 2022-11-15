@@ -114,6 +114,9 @@ export default class AxisChart extends BaseChart {
 		s.datasets = this.data.datasets.map((d, i) => {
 			let values = d.values;
 			let cumulativeYs = d.cumulativeYs || [];
+			let cumulativeYPositives = d.cumulativeYPositive || [];
+			let cumulativeYNegatives = d.cumulativeYNegative || [];
+
 			return {
 				name: d.name && d.name.replace(/<|>|&/g, (char) => char == '&' ? '&amp;' : char == '<' ? '&lt;' : '&gt;'),
 				index: i,
@@ -124,6 +127,8 @@ export default class AxisChart extends BaseChart {
 
 				cumulativeYs: cumulativeYs,
 				cumulativeYPos: scaleAll(cumulativeYs),
+				cumulativeYPositivePositions: scaleAll(cumulativeYPositives),
+				cumulativeYNegativesPositions: scaleAll(cumulativeYNegatives),
 			};
 		});
 	}
@@ -131,7 +136,7 @@ export default class AxisChart extends BaseChart {
 	calcYExtremes() {
 		let s = this.state;
 		if (this.barOptions.stacked) {
-			s.yExtremes = s.datasets[s.datasets.length - 1].cumulativeYPos;
+			s.yExtremes = s.datasets[s.datasets.length - 1].cumulativeYPositivePositions;
 			return;
 		}
 		s.yExtremes = new Array(s.datasetLength).fill(9999);
@@ -150,9 +155,7 @@ export default class AxisChart extends BaseChart {
 			this.state.yMarkers = this.data.yMarkers.map(d => {
 				d.position = scale(d.value, s.yAxis);
 				if (!d.options) d.options = {};
-				// if(!d.label.includes(':')) {
-				// 	d.label += ': ' + d.value;
-				// }
+
 				return d;
 			});
 		}
@@ -167,21 +170,46 @@ export default class AxisChart extends BaseChart {
 	}
 
 	getAllYValues() {
-		let key = 'values';
-
+		let allValueLists = [];
 		if (this.barOptions.stacked) {
-			key = 'cumulativeYs';
 			let cumulative = new Array(this.state.datasetLength).fill(0);
-			this.data.datasets.map((d, i) => {
+
+			// stacked charts can have negative values too, those values should be stacked
+			// separately below the axis in it's own plane
+			let cumulativePositive = new Array(this.state.datasetLength).fill(0);
+			let cumulativeNegative = new Array(this.state.datasetLength).fill(0);
+			let lineCumulative = new Array(this.state.datasetLength).fill(0);
+			
+			this.data.datasets.forEach((d, i) => {
 				let values = this.data.datasets[i].values;
-				d[key] = cumulative = cumulative.map((c, i) => c + values[i]);
+				d.cumulativeYs = cumulative = cumulative.map((c, i) => c + values[i]);
+				
+				// accumulate postives and negatives
+				d.cumulativeYPositive = cumulativePositive = cumulativePositive.map((c, i) => {
+					if (d.chartType === 'line') return c
+					return values[i] > 0 ? c + values[i] : c;
+				})
+
+				d.cumulativeYNegative = cumulativeNegative = cumulativeNegative.map((c, i) => {
+					if (d.chartType === 'line') return c
+					return values[i] < 0 ? c + values[i] : c;
+				})
 			});
+			
+			// if the chart is stacked, the all values list will have the positive and negative cumulatives to accomodate for both axes
+			allValueLists = [
+				...this.data.datasets.map(d => d.cumulativeYPositive),
+				...this.data.datasets.map(d => d.cumulativeYNegative),
+				...this.data.datasets.filter(d => d.chartType === 'line').map(d => d.values)
+			];
+		} else {
+			allValueLists = this.data.datasets.map(d => d.values);
 		}
 
-		let allValueLists = this.data.datasets.map(d => d[key]);
 		if (this.data.yMarkers) {
 			allValueLists.push(this.data.yMarkers.map(d => d.value));
 		}
+
 		if (this.data.yRegions) {
 			this.data.yRegions.map(d => {
 				allValueLists.push([d.end, d.start]);
@@ -274,8 +302,15 @@ export default class AxisChart extends BaseChart {
 					}
 
 					let offsets = new Array(s.datasetLength).fill(0);
+					
 					if (stacked) {
-						offsets = d.yPositions.map((y, j) => y - d.cumulativeYPos[j]);
+						offsets = d.yPositions.map((yPos, index) => {
+							if (d.values[index] > 0) {
+								return yPos - d.cumulativeYPositivePositions[index]
+							} else {
+								return yPos - d.cumulativeYNegativesPositions[index]
+							}
+						});
 					}
 
 					return {
@@ -402,8 +437,7 @@ export default class AxisChart extends BaseChart {
 			let relX = e.pageX - o.left - getLeftOffset(m);
 			let relY = e.pageY - o.top;
 
-			if (relY < this.height + getTopOffset(m)
-				&& relY > getTopOffset(m)) {
+			if (relY < this.height + getTopOffset(m) && relY > getTopOffset(m)) {
 				this.mapTooltipXPosition(relX);
 			} else {
 				this.tip.hideTip();
