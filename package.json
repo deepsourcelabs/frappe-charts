@@ -16,7 +16,7 @@
     "dev": "npm-run-all --parallel watch",
     "build": "rollup -c"
   },
-  "repository": "https://github.com/deepsourcelabs/charts",
+  "repository": "https://github.com/deepsourcelabs/frappe-charts",
   "keywords": [
     "js",
     "charts"
